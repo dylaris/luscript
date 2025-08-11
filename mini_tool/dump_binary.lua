@@ -1,3 +1,5 @@
+-- Usage: lua dump_binary.lua <FILE>
+
 local MAX_WIDTH = 16
 
 local function read_file(filename)

@@ -34,11 +34,11 @@ end
 local function draw_words(words, sorted)
     if sorted then
         for idx, pair in ipairs(words) do
-            print(string.format("[%04d] %-15s %s", idx, pair.key, string.rep("+", pair.value)))
+            print(string.format("[%04d] %-15s (%04d) %s", idx, pair.key, pair.value, string.rep("+", pair.value)))
         end
     else
         for word, count in pairs(words) do
-            print(string.format("%-15s %s", word, string.rep("+", count)))
+            print(string.format("%-15s (%04d) %s", word, count, string.rep("+", count)))
         end
     end
 end

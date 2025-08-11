@@ -72,7 +72,7 @@ end
 
 local function main()
     if #arg ~= 3 then
-        print("usage: lua random_text.lua <FILE> <START> <LENGTH>")
+        print("usage: lua random_text.lua <FILE> <START_WORD> <LENGTH>")
         return 
     end
 

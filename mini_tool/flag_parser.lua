@@ -43,7 +43,7 @@ end
 
 local function main()
     local flags = parse_flags()
-    -- dump_flags(flags)
+    dump_flags(flags)
 
     callback(flags, "hello", function () print("hello world") end)
     callback(flags, "gv", function (flag)
