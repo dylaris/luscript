@@ -1,3 +1,6 @@
+--[[ example
+--]]
+
 local map = {}
 local fill_char = '='
 
