@@ -231,3 +231,93 @@ end
 function math.round(val)
   return val >= 0 and math.floor(val + 0.5) or math.ceil(val - 0.5)
 end
+
+--==============================================================
+-- os extend
+--==============================================================
+
+os.path = {}
+
+-- Join multiple path parts intelligently
+function os.path.join(...)
+  local parts = {...}
+  local result = ""
+
+  for _, p in ipairs(parts) do
+    local is_absolute = p:match("^[/\\]") or p:match("^%a:[/\\]")
+
+    if is_absolute then
+      result = p
+    else
+      if result == "" or result:match("[/\\]$") then
+        result = result .. p
+      else
+        result = result .. "/" .. p
+      end
+    end
+  end
+
+  return os.path.norm(result)
+end
+
+-- Normalize path separators to /
+function os.path.norm(p)
+  return p:gsub("\\", "/"):gsub("/+", "/")
+end
+
+-- Get directory name of path
+function os.path.dirname(p)
+  p = os.path.norm(p)
+  local dir = p:match("^(.+)/[^/]+$")
+  if not dir then
+    if p:match("^/[^/]+$") then
+      return "/"
+    end
+  end
+  return dir or "."
+end
+
+-- Get filename part
+function os.path.basename(p, ext)
+  p = os.path.norm(p)
+  local name = p:match("[^/]+$") or ""
+  if ext then
+    name = name:gsub(ext .. "$", "")
+  end
+  return name
+end
+
+-- Get file extension (without dot)
+function os.path.extname(p)
+  local ext = p:match("%.([^/%.]+)$")
+  return ext or ""
+end
+
+-- Get absolute path (basic version)
+function os.path.abspath(p)
+  if os.path.isabs(p) then
+    return os.path.norm(p)
+  end
+  return os.path.join(os.getenv("PWD") or ".", p)
+end
+
+-- Check if path is absolute
+function os.path.isabs(p)
+  p = os.path.norm(p)
+  return p:sub(1, 1) == "/" or p:match("^%a:[/\\]") ~= nil
+end
+
+-- Split path into (dir, name)
+function os.path.split(p)
+  return os.path.dirname(p), os.path.basename(p)
+end
+
+-- Split filename and extension
+function os.path.splitext(p)
+  local base = os.path.basename(p)
+  local ext = os.path.extname(p)
+  if ext ~= "" then
+    base = base:sub(1, #base - #ext - 1)
+  end
+  return os.path.dirname(p) .. "/" .. base, ext
+end
