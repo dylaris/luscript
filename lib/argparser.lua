@@ -27,6 +27,21 @@ print(parser:getopt("h").used)
 local argparser = {}
 argparser.__index = argparser
 
+local err = {}
+
+function err.println(message)
+  io.stderr:write(tostring(message) .. "\n")
+end
+
+function err.print(message)
+  io.stderr:write(tostring(message))
+end
+
+function err.fatal(message)
+  io.stderr:write(tostring(message) .. "\n")
+  os.exit(1)
+end
+
 -- Create a new argument parser instance with a description
 function argparser.new(description)
   local obj = setmetatable({}, argparser)
@@ -61,7 +76,7 @@ end
 
 -- Check if a string is an option starting with - or --
 local function isopt(s)
-  return not not (s:match("^%-%w$") or s:match("^%-%-%w+"))
+  return not not (s:match("^%-") or s:match("^%-%-"))
 end
 
 -- Split the global arg table into structured options and their arguments
@@ -148,8 +163,7 @@ function argparser:_process_raw_options(raw_opts)
   for _, raw in ipairs(raw_opts) do
     local opt = self.map[raw.name]
     if not opt then
-      print("error: unknown option: " .. raw.name)
-      os.exit(1)
+      err.fatal("error: unknown option: " .. raw.name)
     end
 
     opt.used = true
@@ -224,24 +238,21 @@ end
 -- Ensure the option receives exactly the expected number of arguments
 function argparser:_check_exact_arg_count(opt, actual, expected)
   if actual ~= expected then
-    print(("error: option %s requires %d args, got %d"):format(opt.long, expected, actual))
-    os.exit(1)
+    err.fatal(("error: option %s requires %d args, got %d"):format(opt.long, expected, actual))
   end
 end
 
 -- Ensure the option receives 0 or 1 argument at most
 function argparser:_check_zero_or_one_arg(opt, count)
   if count > 1 then
-    print(("error: option %s allows 0 or 1 args, got %d"):format(opt.long, count))
-    os.exit(1)
+    err.fatal(("error: option %s allows 0 or 1 args, got %d"):format(opt.long, count))
   end
 end
 
 -- Ensure the option receives at least one argument
 function argparser:_check_at_least_one_arg(opt, count)
   if count < 1 then
-    print(("error: option %s requires at least 1 arg, got %d"):format(opt.long, count))
-    os.exit(1)
+    err.fatal(("error: option %s requires at least 1 arg, got %d"):format(opt.long, count))
   end
 end
 
@@ -250,7 +261,7 @@ function argparser:_ensure_required_options_used()
   local missing = false
   for _, opt in ipairs(self.options) do
     if opt.required and not opt.used then
-      print("error: required option not used: " .. opt.long)
+      err.println("error: required option not used: " .. opt.long)
       missing = true
     end
   end
